@@ -20,8 +20,7 @@ while True:
     for post in get_new_posts():
         if post.timeStamp > mostRecentPost:
             slackPost = format_slack_post(post.title, post.sourceUrl, post.permaLink)
-            # requests.post(slackHook, data = slackPost, headers = headers)
-            print(slackPost)
+            requests.post(slackHook, data = slackPost, headers = headers)
             mostRecentPost = post.timeStamp
             conf['mostRecentTimestamp'] = mostRecentPost
             with open('config.yaml', 'w') as f:
