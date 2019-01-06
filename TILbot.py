@@ -12,7 +12,7 @@ def get_data():
     url = "https://www.reddit.com/r/todayilearned/new/.json"
 
     try:
-        data = requests.get(url, headers={'User-agent': 'beginner-project-jirc'})
+        data = requests.get(url, headers={'User-agent': 'TILbot-simple-py-proj'})
     except Exception as e:
         print(e)
         return -1
