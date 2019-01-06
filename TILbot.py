@@ -1,42 +1,30 @@
 import requests
-import html
+import json
+import yaml
+from time import sleep
+from reddit_functions import get_new_posts
 
-class Post:
+with open('config.yaml', 'r') as f:
+    conf = yaml.load(f)
 
-    def __init__(self, timeStamp, postId, title, permaLink, sourceUrl):
-        self.timeStamp = timeStamp
-        self.postId = postId
-        self.title = title
-        self.permaLink = f'https://reddit.com{permaLink}'
-        self.sourceUrl = sourceUrl
+slackHook = conf['slackHook']
+mostRecentPost = conf['mostRecentTimestamp']
 
-def get_data():
-    url = "https://www.reddit.com/r/todayilearned/new/.json"
+headers={'Content-type':'application/json'}
 
-    try:
-        data = requests.get(url, headers={'User-agent': 'TILbot-simple-py-proj'})
-    except Exception as e:
-        print(e)
-        return -1
-    else:
-        return data.json()
+def format_slack_post(message, source, comments):
+    slackPost = {'text': f'_*Fresh fact, hot off the press!*_\n>{message}\n>*Read more:* `{source}`\n>*Join the conversation:* `{comments}`'}
+    return json.dumps(slackPost)
 
-def get_new_posts():
+while True:
+    for post in get_new_posts():
+        if post.timeStamp > mostRecentPost:
+            slackPost = format_slack_post(post.title, post.sourceUrl, post.permaLink)
+            # requests.post(slackHook, data = slackPost, headers = headers)
+            print(slackPost)
+            mostRecentPost = post.timeStamp
+            conf['mostRecentTimestamp'] = mostRecentPost
+            with open('config.yaml', 'w') as f:
+                yaml.dump(conf, f)
 
-    posts = []
-    data = get_data()
-
-    for post in data['data']['children']:
-        timeStamp = post['data']['created_utc']    
-        title = html.unescape(post['data']['title']).lstrip('TIL ').capitalize()
-        sourceUrl = post['data']['url']
-        postId = post['data']['id']
-        permaLink = post['data']['permalink']
-
-        posts.append(Post(timeStamp, postId, title, permaLink, sourceUrl))
-
-    return posts
-
-
-for post in get_new_posts():
-    print(f'{post.timeStamp}\t{post.title}')
+    sleep(60)
