@@ -1,11 +1,13 @@
 import requests
+import html
 
 class Post:
 
-    def __init__(self, timeStamp, postId, title, sourceUrl):
+    def __init__(self, timeStamp, postId, title, permaLink, sourceUrl):
         self.timeStamp = timeStamp
         self.postId = postId
         self.title = title
+        self.permaLink = f'https://reddit.com{permaLink}'
         self.sourceUrl = sourceUrl
 
 def get_data():
@@ -26,14 +28,15 @@ def get_new_posts():
 
     for post in data['data']['children']:
         timeStamp = post['data']['created_utc']    
-        title = post['data']['title']
+        title = html.unescape(post['data']['title']).lstrip('TIL ').capitalize()
         sourceUrl = post['data']['url']
         postId = post['data']['id']
+        permaLink = post['data']['permalink']
 
-        posts.append(Post(timeStamp, postId, title, sourceUrl))
+        posts.append(Post(timeStamp, postId, title, permaLink, sourceUrl))
 
     return posts
 
 
 for post in get_new_posts():
-    print(post.timeStamp)
+    print(f'{post.timeStamp}\t{post.title}')
