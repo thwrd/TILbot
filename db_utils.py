@@ -10,4 +10,3 @@ def create_facts_table(dbConnection):
         cur.execute('''CREATE TABLE facts 
                         (timeStamp BIGINT, postId TEXT, title TEXT,
                         permaLink TEXT, sourceUrl TEXT )''')
-    print('Created facts table in TILbot.db')
