@@ -12,9 +12,9 @@ class Post:
 
     def is_new(self, dbConnection):
         cur = dbConnection.cursor()
-        cur.execute('''SELECT timeStamp FROM facts LIMIT 1 ;''')
-
-        if cur.fetchone()[0] < self.timeStamp:
+        cur.execute('''SELECT timeStamp FROM facts ORDER BY timestamp DESC LIMIT 1 ;''')
+        newestTimeStamp = cur.fetchone()
+        if newestTimeStamp is None or newestTimeStamp[0] < self.timeStamp:
             return True
         else:
             return False
