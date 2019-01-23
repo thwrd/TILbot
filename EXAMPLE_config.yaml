@@ -1,4 +1,4 @@
 {
-    mostRecentTimestamp: 1546774541.0,
+    database: 'TILbot.db',
     slackHook: 'https://hooks.slack.com/services/...'
 }

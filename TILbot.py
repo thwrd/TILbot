@@ -2,14 +2,24 @@ import requests
 import json
 import yaml
 from time import sleep
-from reddit_functions import get_new_posts
+from reddit_utils import get_new_posts
+from db_utils import *
 
+# import configuration
 with open('config.yaml', 'r') as f:
     conf = yaml.load(f)
 
-slackHook = conf['slackHook']
-mostRecentPost = conf['mostRecentTimestamp']
+# instantiate database connection and cursor
+con = get_database_connection(conf['database'])
+cur = con.cursor()
 
+# create database tables if they don't exist
+cur.execute('''SELECT 1 FROM sqlite_master WHERE type='table' AND name='facts';''')
+if cur.fetchone() is None:
+    create_facts_table(con)
+
+# set request headers and slack token
+slackHook = conf['slackHook']
 headers={'Content-type':'application/json'}
 
 def format_slack_post(message, source, comments):
@@ -18,12 +28,9 @@ def format_slack_post(message, source, comments):
 
 while True:
     for post in get_new_posts():
-        if post.timeStamp > mostRecentPost:
+        if post.is_new(con):
+            post.save_post(con)
             slackPost = format_slack_post(post.title, post.sourceUrl, post.permaLink)
             requests.post(slackHook, data = slackPost, headers = headers)
-            mostRecentPost = post.timeStamp
-            conf['mostRecentTimestamp'] = mostRecentPost
-            with open('config.yaml', 'w') as f:
-                yaml.dump(conf, f)
-
     sleep(60)
+
