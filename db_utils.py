@@ -1,7 +1,7 @@
 import sqlite3
 
-def get_database_connection():
-    dbConnection = sqlite3.connect('TILbot.db')
+def get_database_connection(dbName):
+    dbConnection = sqlite3.connect(dbName)
     return dbConnection
 
 def create_facts_table(dbConnection):

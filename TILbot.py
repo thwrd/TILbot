@@ -10,7 +10,7 @@ with open('config.yaml', 'r') as f:
     conf = yaml.load(f)
 
 # instantiate database connection and cursor
-con = get_database_connection()
+con = get_database_connection(conf['database'])
 cur = con.cursor()
 
 # create database tables if they don't exist
